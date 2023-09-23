@@ -1,12 +1,13 @@
 # Azure Pipelines
 
-[![fluentci pipeline](https://img.shields.io/badge/dynamic/json?label=pkg.fluentci.io&labelColor=%23000&color=%23460cf1&url=https%3A%2F%2Fapi.fluentci.io%2Fv1%2Fpipeline%2Fbase_pipeline&query=%24.version)](https://pkg.fluentci.io/base_pipeline)
+[![fluentci pipeline](https://img.shields.io/badge/dynamic/json?label=pkg.fluentci.io&labelColor=%23000&color=%23460cf1&url=https%3A%2F%2Fapi.fluentci.io%2Fv1%2Fpipeline%2Ftrivy_pipeline&query=%24.version)](https://pkg.fluentci.io/trivy_pipeline)
 ![deno compatibility](https://shield.deno.dev/deno/^1.34)
+[![](https://img.shields.io/codecov/c/gh/fluent-ci-templates/trivy-pipeline)](https://codecov.io/gh/fluent-ci-templates/trivy-pipeline)
 
 The following command will generate a `azure-pipelines.yml` file in your project:
 
 ```bash
-fluentci ap init
+fluentci ap init -t trivy_pipeline
 ```
 
 Generated file:
@@ -22,8 +23,8 @@ pool:
 steps:
   - script: |
         curl -fsSL https://deno.land/x/install/install.sh | sh
-        export DENO_INSTALL="$HOME/.deno"
-        export PATH="$DENO_INSTALL/bin:$PATH"
+        export trivy_INSTALL="$HOME/.deno"
+        export PATH="$trivy_INSTALL/bin:$PATH"
     displayName: Install Deno
   - script: deno install -A -r https://cli.fluentci.io -n fluentci
     displayName: Setup Fluent CI CLI
@@ -32,7 +33,7 @@ steps:
         sudo mv bin/dagger /usr/local/bin
         dagger version
     displayName: Setup Dagger
-  - script: fluentci run .
+  - script: fluentci run trivy_pipeline
     displayName: Run Dagger Pipelines
 
 ```

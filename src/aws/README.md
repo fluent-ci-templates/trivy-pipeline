@@ -1,12 +1,13 @@
 # AWS CodePipeline
 
-[![fluentci pipeline](https://img.shields.io/badge/dynamic/json?label=pkg.fluentci.io&labelColor=%23000&color=%23460cf1&url=https%3A%2F%2Fapi.fluentci.io%2Fv1%2Fpipeline%2Fbase_pipeline&query=%24.version)](https://pkg.fluentci.io/base_pipeline)
+[![fluentci pipeline](https://img.shields.io/badge/dynamic/json?label=pkg.fluentci.io&labelColor=%23000&color=%23460cf1&url=https%3A%2F%2Fapi.fluentci.io%2Fv1%2Fpipeline%2Ftrivy_pipeline&query=%24.version)](https://pkg.fluentci.io/trivy_pipeline)
 ![deno compatibility](https://shield.deno.dev/deno/^1.34)
+[![](https://img.shields.io/codecov/c/gh/fluent-ci-templates/trivy-pipeline)](https://codecov.io/gh/fluent-ci-templates/trivy-pipeline)
 
 The following command will generate a `buildspec.yml` file in your project:
 
 ```bash
-fluentci ac init
+fluentci ac init -t trivy_pipeline
 ```
 
 Generated file:
@@ -19,15 +20,15 @@ phases:
   install:
     commands:
       - curl -fsSL https://deno.land/x/install/install.sh | sh
-      - export DENO_INSTALL="$HOME/.deno"
-      - export PATH="$DENO_INSTALL/bin:$PATH"
+      - export trivy_INSTALL="$HOME/.deno"
+      - export PATH="$trivy_INSTALL/bin:$PATH"
       - deno install -A -r https://cli.fluentci.io -n fluentci
       - curl -L https://dl.dagger.io/dagger/install.sh | DAGGER_VERSION=0.8.1 sh
       - mv bin/dagger /usr/local/bin
       - dagger version
   build:
     commands:
-      - fluentci run .
+      - fluentci run trivy_pipeline
   post_build:
     commands:
       - echo Build completed on `date`
