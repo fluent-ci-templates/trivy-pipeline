@@ -11,7 +11,7 @@ A ready-to-use CI/CD Pipeline for scanning vulnerabilities using [Trivy](https:/
 Run the following command:
 
 ```bash
-dagger run fluentci trivy_pipeline
+fluentci run trivy_pipeline
 ```
 
 Or, if you want to use it as a template:
@@ -25,7 +25,7 @@ This will create a `.fluentci` folder in your project.
 Now you can run the pipeline with:
 
 ```bash
-dagger run fluentci .
+fluentci run .
 ```
 
 ## Environment variables
