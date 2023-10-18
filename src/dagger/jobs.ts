@@ -1,4 +1,4 @@
-import Client from "../../deps.ts";
+import Client, { connect } from "../../deps.ts";
 
 export enum Job {
   config = "config",
@@ -10,121 +10,132 @@ export enum Job {
 
 export const exclude = [".fluentci"];
 
-export const config = async (client: Client, src = ".") => {
-  const context = client.host().directory(src);
-  const args = ["config", src];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || "0";
-  args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+export const config = async (src = ".", exitCode?: number) => {
+  await connect(async (client: Client) => {
+    const context = client.host().directory(src);
+    const args = ["config", src];
+    const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+    args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
-  const ctr = client
-    .pipeline(Job.config)
-    .container()
-    .from("aquasec/trivy")
-    .withDirectory("/app", context, { exclude })
-    .withWorkdir("/app")
-    .withExec(args);
+    const ctr = client
+      .pipeline(Job.config)
+      .container()
+      .from("aquasec/trivy")
+      .withDirectory("/app", context, { exclude })
+      .withWorkdir("/app")
+      .withExec(args);
 
-  const result = await ctr.stdout();
+    const result = await ctr.stdout();
 
-  console.log(result);
+    console.log(result);
+  });
+  return "Done";
 };
 
-export const fs = async (client: Client, src = ".") => {
-  const context = client.host().directory(src);
-  const args = ["fs", src];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || "0";
-  args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+export const fs = async (src = ".", exitCode?: number) => {
+  await connect(async (client: Client) => {
+    const context = client.host().directory(src);
+    const args = ["fs", src];
+    const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+    args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
-  const ctr = client
-    .pipeline(Job.fs)
-    .container()
-    .from("aquasec/trivy")
-    .withDirectory("/app", context, { exclude })
-    .withWorkdir("/app")
-    .withExec(args);
+    const ctr = client
+      .pipeline(Job.fs)
+      .container()
+      .from("aquasec/trivy")
+      .withDirectory("/app", context, { exclude })
+      .withWorkdir("/app")
+      .withExec(args);
 
-  const result = await ctr.stdout();
+    const result = await ctr.stdout();
 
-  console.log(result);
+    console.log(result);
+  });
+  return "Done";
 };
 
-export const repo = async (client: Client, src = ".") => {
-  const context = client.host().directory(src);
-  const args = ["repo", Deno.env.get("TRIVY_REPO_URL") || src];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || "0";
-  args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+export const repo = async (src = ".", exitCode?: number, repoUrl?: string) => {
+  await connect(async (client: Client) => {
+    const context = client.host().directory(src);
+    const args = ["repo", Deno.env.get("TRIVY_REPO_URL") || repoUrl || src];
+    const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+    args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
-  const ctr = client
-    .pipeline(Job.repo)
-    .container()
-    .from("aquasec/trivy")
-    .withDirectory("/app", context, { exclude })
-    .withWorkdir("/app")
-    .withExec(args);
+    const ctr = client
+      .pipeline(Job.repo)
+      .container()
+      .from("aquasec/trivy")
+      .withDirectory("/app", context, { exclude })
+      .withWorkdir("/app")
+      .withExec(args);
 
-  const result = await ctr.stdout();
+    const result = await ctr.stdout();
 
-  console.log(result);
+    console.log(result);
+  });
+  return "Done";
 };
 
-export const image = async (client: Client, src = ".") => {
-  const context = client.host().directory(src);
-  if (!Deno.env.has("TRIVY_IMAGE")) {
-    throw new Error("TRIVY_IMAGE is not set");
-  }
+export const image = async (src = ".", exitCode?: number, image?: string) => {
+  await connect(async (client: Client) => {
+    const context = client.host().directory(src);
+    if (!Deno.env.has("TRIVY_IMAGE") && !image) {
+      throw new Error("TRIVY_IMAGE is not set");
+    }
 
-  const args = ["image", Deno.env.get("TRIVY_IMAGE")!];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || "0";
-  args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+    const args = ["image", Deno.env.get("TRIVY_IMAGE") || image!];
+    const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+    args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
-  const ctr = client
-    .pipeline(Job.image)
-    .container()
-    .from("aquasec/trivy")
-    .withDirectory("/app", context, { exclude })
-    .withWorkdir("/app")
-    .withExec(args);
+    const ctr = client
+      .pipeline(Job.image)
+      .container()
+      .from("aquasec/trivy")
+      .withDirectory("/app", context, { exclude })
+      .withWorkdir("/app")
+      .withExec(args);
 
-  const result = await ctr.stdout();
+    const result = await ctr.stdout();
 
-  console.log(result);
+    console.log(result);
+  });
+  return "Done";
 };
 
-export const sbom = async (client: Client, src = ".") => {
-  const context = client.host().directory(src);
-  if (!Deno.env.has("TRIVY_SBOM_PATH")) {
-    throw new Error("TRIVY_SBOM_PATH is not set");
-  }
+export const sbom = async (src = ".", exitCode?: number, path?: string) => {
+  await connect(async (client: Client) => {
+    const context = client.host().directory(src);
+    if (!Deno.env.has("TRIVY_SBOM_PATH") && !path) {
+      throw new Error("TRIVY_SBOM_PATH is not set");
+    }
 
-  const args = ["sbom", Deno.env.get("TRIVY_SBOM_PATH")!];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || "0";
-  args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+    const args = ["sbom", Deno.env.get("TRIVY_SBOM_PATH") || path!];
+    const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+    args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
-  const ctr = client
-    .pipeline(Job.config)
-    .container()
-    .from("aquasec/trivy")
-    .withDirectory("/app", context, { exclude })
-    .withWorkdir("/app")
-    .withExec(args);
+    const ctr = client
+      .pipeline(Job.config)
+      .container()
+      .from("aquasec/trivy")
+      .withDirectory("/app", context, { exclude })
+      .withWorkdir("/app")
+      .withExec(args);
 
-  const result = await ctr.stdout();
+    const result = await ctr.stdout();
 
-  console.log(result);
+    console.log(result);
+  });
+  return "Done";
 };
 
 export type JobExec = (
-  client: Client,
-  src?: string
+  src?: string,
+  exitCode?: number
 ) =>
-  | Promise<void>
-  | ((
-      client: Client,
-      src?: string,
-      options?: {
-        ignore: string[];
-      }
-    ) => Promise<void>);
+  | Promise<string>
+  | ((src?: string, exitCode?: number, path?: string) => Promise<string>)
+  | ((src?: string, exitCode?: number, repoUrl?: string) => Promise<string>)
+  | ((src?: string, exitCode?: number, image?: string) => Promise<string>);
 
 export const runnableJobs: Record<Job, JobExec> = {
   [Job.config]: config,
