@@ -1,0 +1,5 @@
+{
+  "root": "",
+  "name": "trivy",
+  "sdkRuntime": "tsiry/dagger-sdk-deno"
+}
