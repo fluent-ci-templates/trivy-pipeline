@@ -1,7 +1,7 @@
 # Trivy Pipeline
 
 [![fluentci pipeline](https://img.shields.io/badge/dynamic/json?label=pkg.fluentci.io&labelColor=%23000&color=%23460cf1&url=https%3A%2F%2Fapi.fluentci.io%2Fv1%2Fpipeline%2Ftrivy_pipeline&query=%24.version)](https://pkg.fluentci.io/trivy_pipeline)
-![deno compatibility](https://shield.deno.dev/deno/^1.34)
+![deno compatibility](https://shield.deno.dev/deno/^1.37)
 [![](https://img.shields.io/codecov/c/gh/fluent-ci-templates/trivy-pipeline)](https://codecov.io/gh/fluent-ci-templates/trivy-pipeline)
 
 A ready-to-use CI/CD Pipeline for scanning vulnerabilities using [Trivy](https://trivy.dev/).
@@ -46,19 +46,35 @@ fluentci run .
 | image    | Scan a container image                        |
 | sbom     | Scan a software bill of materials             |
 
+```graphql
+config(exitCode: Int!, src: String!): String
+
+fs(exitCode: Int!, src: String!): String
+
+image(
+  exitCode: Int!, 
+  image: String!, 
+  src: String!
+): String
+
+repo(
+  exitCode: Int!, 
+  repoUrl: String!, 
+  src: String!
+): String
+
+sbom(
+  exitCode: Int!, 
+  path: String!, 
+  src: String!
+): String
+```
 ## Programmatic usage
 
 You can also use this pipeline programmatically:
 
 ```ts
-import Client, { connect } from "https://sdk.fluentci.io/v0.1.9/mod.ts";
-import { fs } from "https://pkg.fluentci.io/trivy_pipeline@v0.1.0/mod.ts";
+import { fs } from "https://pkg.fluentci.io/trivy_pipeline@v0.2.0/mod.ts";
 
-function pipeline(src = ".") {
-  connect(async (client: Client) => {
-    await fs(client, src);
-  });
-}
-
-pipeline();
+await fs();
 ```

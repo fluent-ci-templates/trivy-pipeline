@@ -1,0 +1,5 @@
+{
+  trivy {
+    config(src: ".", exitCode: 0)
+  }
+}
