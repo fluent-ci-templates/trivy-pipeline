@@ -1,5 +1,7 @@
 {
   trivy {
-    image(src: ".", exitCode: 0, image: "snyk/snyk:alpine")
+    image(src: ".", exitCode: 0, image: "snyk/snyk:alpine") {
+      id
+    }
   }
 }
