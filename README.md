@@ -81,6 +81,7 @@ repo(
 image(
   src: Directory | string,
   exitCode?: number,
+  image?: string,
   format?: string,
   output?: string
 ): Promise<string>

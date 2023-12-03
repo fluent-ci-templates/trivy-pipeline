@@ -69,7 +69,7 @@ export async function fs(
   exitCode?: number,
   format?: string,
   output?: string
-): Promise<string> {
+): Promise<File | string> {
   let id = "";
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);
@@ -115,7 +115,7 @@ export async function repo(
   repoUrl?: string,
   format?: string,
   output?: string
-): Promise<string> {
+): Promise<File | string> {
   let id = "";
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);
@@ -160,7 +160,7 @@ export async function image(
   image?: string,
   format?: string,
   output?: string
-): Promise<string> {
+): Promise<File | string> {
   let id = "";
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);

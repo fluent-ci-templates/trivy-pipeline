@@ -1,4 +1,4 @@
-import Client, { Directory } from "../../deps.ts";
+import Client, { Directory, File } from "../../deps.ts";
 import { connect } from "../../sdk/connect.ts";
 import { getDirectory } from "./lib.ts";
 
@@ -19,14 +19,15 @@ export const exclude = [".fluentci"];
  * @param {number} exitCode
  * @param {string} format
  * @param {string} output
- * @returns {Promise<string>}
+ * @returns {Promise<File | string>}
  */
 export async function config(
   src: Directory | string,
   exitCode?: number,
   format?: string,
   output?: string
-): Promise<string> {
+): Promise<File | string> {
+  let id = "";
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);
     const args = ["config", "."];
@@ -48,11 +49,10 @@ export async function config(
       .withWorkdir("/app")
       .withExec(args);
 
-    const result = await ctr.stdout();
-
-    console.log(result);
+    await ctr.stdout();
+    id = await ctr.file(`/app/${output}`).id();
   });
-  return "Done";
+  return id;
 }
 
 /**
@@ -62,14 +62,15 @@ export async function config(
  * @param {number} exitCode
  * @param {string} format
  * @param {string} output
- * @returns {Promise<string>}
+ * @returns {Promise<File | string>}
  */
 export async function fs(
   src: Directory | string,
   exitCode?: number,
   format?: string,
   output?: string
-): Promise<string> {
+): Promise<File | string> {
+  let id = "";
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);
     const args = ["fs", "."];
@@ -91,11 +92,11 @@ export async function fs(
       .withWorkdir("/app")
       .withExec(args);
 
-    const result = await ctr.stdout();
+    await ctr.stdout();
 
-    console.log(result);
+    id = await ctr.file(`/app/${output}`).id();
   });
-  return "Done";
+  return id;
 }
 
 /**
@@ -106,7 +107,7 @@ export async function fs(
  * @param {string} repoUrl
  * @param {string} format
  * @param {string} output
- * @returns {Promise<string>}
+ * @returns {Promise<File | string>}
  */
 export async function repo(
   src: Directory | string,
@@ -114,7 +115,8 @@ export async function repo(
   repoUrl?: string,
   format?: string,
   output?: string
-): Promise<string> {
+): Promise<File | string> {
+  let id = "";
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);
     const args = ["repo", Deno.env.get("TRIVY_REPO_URL") || repoUrl || "."];
@@ -135,12 +137,11 @@ export async function repo(
       .withDirectory("/app", context, { exclude })
       .withWorkdir("/app")
       .withExec(args);
+    await ctr.stdout();
 
-    const result = await ctr.stdout();
-
-    console.log(result);
+    id = await ctr.file(`/app/${output}`).id();
   });
-  return "Done";
+  return id;
 }
 
 /**
@@ -151,7 +152,7 @@ export async function repo(
  * @param {string} image
  * @param {string} format
  * @param {string} output
- * @returns {Promise<string>}
+ * @returns {Promise<File | string>}
  */
 export async function image(
   src: Directory | string,
@@ -159,7 +160,8 @@ export async function image(
   image?: string,
   format?: string,
   output?: string
-): Promise<string> {
+): Promise<File | string> {
+  let id = "";
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);
     if (!Deno.env.has("TRIVY_IMAGE") && !image) {
@@ -187,11 +189,10 @@ export async function image(
       .withWorkdir("/app")
       .withExec(args);
 
-    const result = await ctr.stdout();
-
-    console.log(result);
+    await ctr.stdout();
+    id = await ctr.file(`/app/${output}`).id();
   });
-  return "Done";
+  return id;
 }
 
 /**
@@ -202,7 +203,7 @@ export async function image(
  * @param {string} path
  * @param {string} format
  * @param {string} output
- * @returns {Promise<string>}
+ * @returns {Promise<File | string>}
  */
 export async function sbom(
   src: Directory | string,
@@ -210,7 +211,8 @@ export async function sbom(
   path?: string,
   format?: string,
   output?: string
-): Promise<string> {
+): Promise<File | string> {
+  let id = "";
   await connect(async (client: Client) => {
     const context = getDirectory(client, src);
     if (!Deno.env.has("TRIVY_SBOM_PATH") && !path) {
@@ -237,11 +239,10 @@ export async function sbom(
       .withWorkdir("/app")
       .withExec(args);
 
-    const result = await ctr.stdout();
-
-    console.log(result);
+    await ctr.stdout();
+    id = await ctr.file(`/app/${output}`).id();
   });
-  return "Done";
+  return id;
 }
 
 export type JobExec = (
@@ -250,7 +251,7 @@ export type JobExec = (
   path?: string,
   format?: string,
   output?: string
-) => Promise<string>;
+) => Promise<File | string>;
 
 export const runnableJobs: Record<Job, JobExec> = {
   [Job.config]: config,
