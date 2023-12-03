@@ -1,4 +1,6 @@
-import Client, { connect } from "../../deps.ts";
+import Client, { Directory } from "../../deps.ts";
+import { connect } from "../../sdk/connect.ts";
+import { getDirectory } from "./lib.ts";
 
 export enum Job {
   config = "config",
@@ -10,12 +12,33 @@ export enum Job {
 
 export const exclude = [".fluentci"];
 
-export const config = async (src = ".", exitCode?: number) => {
+/**
+ * @function
+ * @description Scan a configuration file
+ * @param {Directory | string} src
+ * @param {number} exitCode
+ * @param {string} format
+ * @param {string} output
+ * @returns {Promise<string>}
+ */
+export async function config(
+  src: Directory | string,
+  exitCode?: number,
+  format?: string,
+  output?: string
+): Promise<string> {
   await connect(async (client: Client) => {
-    const context = client.host().directory(src);
-    const args = ["config", src];
+    const context = getDirectory(client, src);
+    const args = ["config", "."];
     const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
     args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+
+    if (format) {
+      args.push(`--format=${format}`);
+    }
+
+    output = output || "output";
+    args.push(`--output=${output}`);
 
     const ctr = client
       .pipeline(Job.config)
@@ -30,14 +53,35 @@ export const config = async (src = ".", exitCode?: number) => {
     console.log(result);
   });
   return "Done";
-};
+}
 
-export const fs = async (src = ".", exitCode?: number) => {
+/**
+ * @function
+ * @description Scan a local filesystem
+ * @param {Directory | string} src
+ * @param {number} exitCode
+ * @param {string} format
+ * @param {string} output
+ * @returns {Promise<string>}
+ */
+export async function fs(
+  src: Directory | string,
+  exitCode?: number,
+  format?: string,
+  output?: string
+): Promise<string> {
   await connect(async (client: Client) => {
-    const context = client.host().directory(src);
-    const args = ["fs", src];
+    const context = getDirectory(client, src);
+    const args = ["fs", "."];
     const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
     args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+
+    if (format) {
+      args.push(`--format=${format}`);
+    }
+
+    output = output || "output";
+    args.push(`--output=${output}`);
 
     const ctr = client
       .pipeline(Job.fs)
@@ -52,14 +96,37 @@ export const fs = async (src = ".", exitCode?: number) => {
     console.log(result);
   });
   return "Done";
-};
+}
 
-export const repo = async (src = ".", exitCode?: number, repoUrl?: string) => {
+/**
+ * @function
+ * @description Scan a repository
+ * @param {Directory | string} src
+ * @param {number} exitCode
+ * @param {string} repoUrl
+ * @param {string} format
+ * @param {string} output
+ * @returns {Promise<string>}
+ */
+export async function repo(
+  src: Directory | string,
+  exitCode?: number,
+  repoUrl?: string,
+  format?: string,
+  output?: string
+): Promise<string> {
   await connect(async (client: Client) => {
-    const context = client.host().directory(src);
-    const args = ["repo", Deno.env.get("TRIVY_REPO_URL") || repoUrl || src];
+    const context = getDirectory(client, src);
+    const args = ["repo", Deno.env.get("TRIVY_REPO_URL") || repoUrl || "."];
     const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
     args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+
+    if (format) {
+      args.push(`--format=${format}`);
+    }
+
+    output = output || "output";
+    args.push(`--output=${output}`);
 
     const ctr = client
       .pipeline(Job.repo)
@@ -74,16 +141,41 @@ export const repo = async (src = ".", exitCode?: number, repoUrl?: string) => {
     console.log(result);
   });
   return "Done";
-};
+}
 
-export const image = async (src = ".", exitCode?: number, image?: string) => {
+/**
+ * @function
+ * @description Scan a container image
+ * @param {Directory | string} src
+ * @param {number} exitCode
+ * @param {string} image
+ * @param {string} format
+ * @param {string} output
+ * @returns {Promise<string>}
+ */
+export async function image(
+  src: Directory | string,
+  exitCode?: number,
+  image?: string,
+  format?: string,
+  output?: string
+): Promise<string> {
   await connect(async (client: Client) => {
-    const context = client.host().directory(src);
+    const context = getDirectory(client, src);
     if (!Deno.env.has("TRIVY_IMAGE") && !image) {
-      throw new Error("TRIVY_IMAGE is not set");
+      console.log("TRIVY_IMAGE is not set");
+      Deno.exit(1);
     }
 
     const args = ["image", Deno.env.get("TRIVY_IMAGE") || image!];
+
+    if (format) {
+      args.push(`--format=${format}`);
+    }
+
+    output = output || "output";
+    args.push(`--output=${output}`);
+
     const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
     args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
@@ -100,18 +192,42 @@ export const image = async (src = ".", exitCode?: number, image?: string) => {
     console.log(result);
   });
   return "Done";
-};
+}
 
-export const sbom = async (src = ".", exitCode?: number, path?: string) => {
+/**
+ * @function
+ * @description Scan a software bill of materials
+ * @param {Directory | string} src
+ * @param {number} exitCode
+ * @param {string} path
+ * @param {string} format
+ * @param {string} output
+ * @returns {Promise<string>}
+ */
+export async function sbom(
+  src: Directory | string,
+  exitCode?: number,
+  path?: string,
+  format?: string,
+  output?: string
+): Promise<string> {
   await connect(async (client: Client) => {
-    const context = client.host().directory(src);
+    const context = getDirectory(client, src);
     if (!Deno.env.has("TRIVY_SBOM_PATH") && !path) {
-      throw new Error("TRIVY_SBOM_PATH is not set");
+      console.error("TRIVY_SBOM_PATH is not set");
+      Deno.exit(1);
     }
 
     const args = ["sbom", Deno.env.get("TRIVY_SBOM_PATH") || path!];
     const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
     args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+
+    if (format) {
+      args.push(`--format=${format}`);
+    }
+
+    output = output || "output";
+    args.push(`--output=${output}`);
 
     const ctr = client
       .pipeline(Job.config)
@@ -126,16 +242,15 @@ export const sbom = async (src = ".", exitCode?: number, path?: string) => {
     console.log(result);
   });
   return "Done";
-};
+}
 
 export type JobExec = (
-  src?: string,
-  exitCode?: number
-) =>
-  | Promise<string>
-  | ((src?: string, exitCode?: number, path?: string) => Promise<string>)
-  | ((src?: string, exitCode?: number, repoUrl?: string) => Promise<string>)
-  | ((src?: string, exitCode?: number, image?: string) => Promise<string>);
+  src: Directory | string,
+  exitCode?: number,
+  path?: string,
+  format?: string,
+  output?: string
+) => Promise<string>;
 
 export const runnableJobs: Record<Job, JobExec> = {
   [Job.config]: config,

@@ -28,6 +28,15 @@ Now you can run the pipeline with:
 fluentci run .
 ```
 
+## Dagger Module
+
+Use as a [Dagger](https://dagger.io) Module:
+
+```bash
+dagger mod install github.com/fluent-ci-templates/trivy-pipeline@mod
+```
+
+
 ## Environment variables
 
 | Variable                | Description                                                         |
@@ -46,28 +55,37 @@ fluentci run .
 | image    | Scan a container image                        |
 | sbom     | Scan a software bill of materials             |
 
-```graphql
-config(exitCode: Int!, src: String!): String
+```typescript
+config(
+  src: Directory | string,
+  exitCode?: number,
+  format?: string,
+  output?: string
+): Promise<string>
 
-fs(exitCode: Int!, src: String!): String
-
-image(
-  exitCode: Int!, 
-  image: String!, 
-  src: String!
-): String
+fs(
+  src: Directory | string,
+  exitCode?: number,
+  format?: string,
+  output?: string
+): Promise<string>
 
 repo(
-  exitCode: Int!, 
-  repoUrl: String!, 
-  src: String!
-): String
+  src: Directory | string,
+  exitCode?: number,
+  repoUrl?: string,
+  format?: string,
+  output?: string
+): Promise<string>
 
-sbom(
-  exitCode: Int!, 
-  path: String!, 
-  src: String!
-): String
+image(
+  src: Directory | string,
+  exitCode?: number,
+  format?: string,
+  output?: string
+): Promise<string>
+
+
 ```
 ## Programmatic usage
 
@@ -76,5 +94,5 @@ You can also use this pipeline programmatically:
 ```ts
 import { fs } from "https://pkg.fluentci.io/trivy_pipeline@v0.2.2/mod.ts";
 
-await fs();
+await fs(".");
 ```
