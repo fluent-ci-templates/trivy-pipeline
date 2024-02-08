@@ -62,14 +62,14 @@ config(
   src: Directory | string,
   exitCode?: number,
   format?: string,
-  output?: string
+  outputFile?: string
 ): Promise<string>
 
 fs(
   src: Directory | string,
   exitCode?: number,
   format?: string,
-  output?: string
+  outputFile?: string
 ): Promise<string>
 
 repo(
@@ -77,7 +77,7 @@ repo(
   exitCode?: number,
   repoUrl?: string,
   format?: string,
-  output?: string
+  outputFile?: string
 ): Promise<string>
 
 image(
@@ -85,7 +85,7 @@ image(
   exitCode?: number,
   image?: string,
   format?: string,
-  output?: string
+  outputFile?: string
 ): Promise<string>
 
 

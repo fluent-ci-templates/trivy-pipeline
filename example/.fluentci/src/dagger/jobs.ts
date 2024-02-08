@@ -17,26 +17,23 @@ export const exclude = [".fluentci"];
  * @param {Directory | string} src
  * @param {number} exitCode
  * @param {string} format
- * @param {string} output
+ * @param {string} outputFile
  * @returns {Promise<File | string>}
  */
 export async function config(
   src: Directory | string,
-  exitCode?: number,
-  format?: string,
-  output?: string
+  exitCode = 0,
+  format = "table",
+  outputFile?: string
 ): Promise<File | string> {
   const context = await getDirectory(dag, src);
   const args = ["config", "."];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+  args.push(`--format=${format}`);
 
-  if (format) {
-    args.push(`--format=${format}`);
-  }
-
-  output = output || "output";
-  args.push(`--output=${output}`);
+  outputFile = outputFile || "output";
+  args.push(`--output=${outputFile}`);
 
   const ctr = dag
     .pipeline(Job.config)
@@ -47,7 +44,7 @@ export async function config(
     .withExec(args);
 
   await ctr.stdout();
-  const id = await ctr.file(`/app/${output}`).id();
+  const id = await ctr.file(`/app/${outputFile}`).id();
   return id;
 }
 
@@ -57,26 +54,26 @@ export async function config(
  * @param {Directory | string} src
  * @param {number} exitCode
  * @param {string} format
- * @param {string} output
+ * @param {string} outputFile
  * @returns {Promise<File | string>}
  */
 export async function fs(
   src: Directory | string,
-  exitCode?: number,
-  format?: string,
-  output?: string
+  exitCode = 0,
+  format = "table",
+  outputFile?: string
 ): Promise<File | string> {
   const context = await getDirectory(dag, src);
   const args = ["fs", "."];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
   if (format) {
     args.push(`--format=${format}`);
   }
 
-  output = output || "output";
-  args.push(`--output=${output}`);
+  outputFile = outputFile || "output";
+  args.push(`--output=${outputFile}`);
 
   const ctr = dag
     .pipeline(Job.fs)
@@ -88,7 +85,7 @@ export async function fs(
 
   await ctr.stdout();
 
-  const id = await ctr.file(`/app/${output}`).id();
+  const id = await ctr.file(`/app/${outputFile}`).id();
   return id;
 }
 
@@ -99,27 +96,24 @@ export async function fs(
  * @param {number} exitCode
  * @param {string} repoUrl
  * @param {string} format
- * @param {string} output
+ * @param {string} outputFile
  * @returns {Promise<File | string>}
  */
 export async function repo(
   src: Directory | string,
-  exitCode?: number,
+  exitCode = 0,
   repoUrl?: string,
-  format?: string,
-  output?: string
+  format = "table",
+  outputFile?: string
 ): Promise<File | string> {
   const context = await getDirectory(dag, src);
   const args = ["repo", Deno.env.get("TRIVY_REPO_URL") || repoUrl || "."];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+  args.push(`--format=${format}`);
 
-  if (format) {
-    args.push(`--format=${format}`);
-  }
-
-  output = output || "output";
-  args.push(`--output=${output}`);
+  outputFile = outputFile || "output";
+  args.push(`--output=${outputFile}`);
 
   const ctr = dag
     .pipeline(Job.repo)
@@ -130,7 +124,7 @@ export async function repo(
     .withExec(args);
   await ctr.stdout();
 
-  const id = await ctr.file(`/app/${output}`).id();
+  const id = await ctr.file(`/app/${outputFile}`).id();
   return id;
 }
 
@@ -141,15 +135,15 @@ export async function repo(
  * @param {number} exitCode
  * @param {string} image
  * @param {string} format
- * @param {string} output
+ * @param {string} outputFile
  * @returns {Promise<File | string>}
  */
 export async function image(
   src: Directory | string,
-  exitCode?: number,
+  exitCode = 0,
   image?: string,
-  format?: string,
-  output?: string
+  format = "table",
+  outputFile?: string
 ): Promise<File | string> {
   const context = await getDirectory(dag, src);
   if (!Deno.env.has("TRIVY_IMAGE") && !image) {
@@ -158,15 +152,12 @@ export async function image(
   }
 
   const args = ["image", Deno.env.get("TRIVY_IMAGE") || image!];
+  args.push(`--format=${format}`);
 
-  if (format) {
-    args.push(`--format=${format}`);
-  }
+  outputFile = outputFile || "output";
+  args.push(`--output=${outputFile}`);
 
-  output = output || "output";
-  args.push(`--output=${output}`);
-
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
   const ctr = dag
@@ -178,7 +169,7 @@ export async function image(
     .withExec(args);
 
   await ctr.stdout();
-  const id = await ctr.file(`/app/${output}`).id();
+  const id = await ctr.file(`/app/${outputFile}`).id();
   return id;
 }
 
@@ -189,15 +180,15 @@ export async function image(
  * @param {number} exitCode
  * @param {string} path
  * @param {string} format
- * @param {string} output
+ * @param {string} outputFile
  * @returns {Promise<File | string>}
  */
 export async function sbom(
   src: Directory | string,
-  exitCode?: number,
+  exitCode = 0,
   path?: string,
-  format?: string,
-  output?: string
+  format = "table",
+  outputFile?: string
 ): Promise<File | string> {
   const context = await getDirectory(dag, src);
   if (!Deno.env.has("TRIVY_SBOM_PATH") && !path) {
@@ -206,15 +197,12 @@ export async function sbom(
   }
 
   const args = ["sbom", Deno.env.get("TRIVY_SBOM_PATH") || path!];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode || "0";
+  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
+  args.push(`--format=${format}`);
 
-  if (format) {
-    args.push(`--format=${format}`);
-  }
-
-  output = output || "output";
-  args.push(`--output=${output}`);
+  outputFile = outputFile || "output";
+  args.push(`--output=${outputFile}`);
 
   const ctr = dag
     .pipeline(Job.config)
@@ -225,7 +213,7 @@ export async function sbom(
     .withExec(args);
 
   await ctr.stdout();
-  const id = await ctr.file(`/app/${output}`).id();
+  const id = await ctr.file(`/app/${outputFile}`).id();
   return id;
 }
 
@@ -234,7 +222,7 @@ export type JobExec = (
   exitCode?: number,
   path?: string,
   format?: string,
-  output?: string
+  outputFile?: string
 ) => Promise<File | string>;
 
 export const runnableJobs: Record<Job, JobExec> = {
