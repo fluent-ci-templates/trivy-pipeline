@@ -4,6 +4,8 @@
 ![deno compatibility](https://shield.deno.dev/deno/^1.37)
 [![](https://img.shields.io/codecov/c/gh/fluent-ci-templates/trivy-pipeline)](https://codecov.io/gh/fluent-ci-templates/trivy-pipeline)
 
+[![CodeSee](https://codesee-docs.s3.amazonaws.com/badge.svg?)](https://app.codesee.io/maps/public/25ddb0a0-c690-11ee-9af8-b973aab28c96)
+
 A ready-to-use CI/CD Pipeline for scanning vulnerabilities using [Trivy](https://trivy.dev/).
 
 ## 🚀 Usage
@@ -93,7 +95,7 @@ image(
 You can also use this pipeline programmatically:
 
 ```ts
-import { fs } from "https://pkg.fluentci.io/trivy_pipeline@v0.3.1/mod.ts";
+import { fs } from "https://pkg.fluentci.io/trivy_pipeline@v0.3.2/mod.ts";
 
 await fs(".");
 ```
