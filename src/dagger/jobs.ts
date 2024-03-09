@@ -238,3 +238,11 @@ export const runnableJobs: Record<Job, JobExec> = {
   [Job.image]: image,
   [Job.sbom]: sbom,
 };
+
+export const jobDescriptions: Record<Job, string> = {
+  [Job.config]: "Scan a configuration file",
+  [Job.fs]: "Scan a local filesystem",
+  [Job.repo]: "Scan a repository",
+  [Job.image]: "Scan a container image",
+  [Job.sbom]: "Scan a software bill of materials",
+};
