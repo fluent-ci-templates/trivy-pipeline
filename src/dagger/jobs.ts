@@ -1,4 +1,9 @@
-import { Directory, File, dag } from "../../deps.ts";
+/**
+ * @module trivy
+ * @description This module provides a set of functions for scanning container images, repositories, and local filesystems for vulnerabilities using Trivy.
+ */
+
+import { Directory, File, dag, env, exit } from "../../deps.ts";
 import { getDirectory } from "./lib.ts";
 
 export enum Job {
@@ -12,6 +17,8 @@ export enum Job {
 export const exclude = [".fluentci"];
 
 /**
+ * Scan a configuration file
+ *
  * @function
  * @description Scan a configuration file
  * @param {Directory | string} src
@@ -26,9 +33,9 @@ export async function config(
   format = "table",
   outputFile?: string
 ): Promise<File | string> {
-  const context = await getDirectory(dag, src);
+  const context = await getDirectory(src);
   const args = ["config", "."];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
+  const TRIVY_EXIT_CODE = env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
   args.push(`--format=${format}`);
 
@@ -63,9 +70,9 @@ export async function fs(
   format = "table",
   outputFile?: string
 ): Promise<File | string> {
-  const context = await getDirectory(dag, src);
+  const context = await getDirectory(src);
   const args = ["fs", "."];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
+  const TRIVY_EXIT_CODE = env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
   if (format) {
@@ -106,9 +113,9 @@ export async function repo(
   format = "table",
   outputFile?: string
 ): Promise<File | string> {
-  const context = await getDirectory(dag, src);
-  const args = ["repo", Deno.env.get("TRIVY_REPO_URL") || repoUrl || "."];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
+  const context = await getDirectory(src);
+  const args = ["repo", env.get("TRIVY_REPO_URL") || repoUrl || "."];
+  const TRIVY_EXIT_CODE = env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
   args.push(`--format=${format}`);
 
@@ -124,8 +131,7 @@ export async function repo(
     .withExec(args);
   await ctr.stdout();
 
-  const id = await ctr.file(`/app/${outputFile}`).id();
-  return id;
+  return ctr.file(`/app/${outputFile}`).id();
 }
 
 /**
@@ -145,19 +151,20 @@ export async function image(
   format = "table",
   outputFile?: string
 ): Promise<File | string> {
-  const context = await getDirectory(dag, src);
-  if (!Deno.env.has("TRIVY_IMAGE") && !image) {
+  const context = await getDirectory(src);
+  if (!env.has("TRIVY_IMAGE") && !image) {
     console.log("TRIVY_IMAGE is not set");
-    Deno.exit(1);
+    exit(1);
+    return "";
   }
 
-  const args = ["image", Deno.env.get("TRIVY_IMAGE") || image!];
+  const args = ["image", env.get("TRIVY_IMAGE") || image!];
   args.push(`--format=${format}`);
 
   outputFile = outputFile || "output";
   args.push(`--output=${outputFile}`);
 
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
+  const TRIVY_EXIT_CODE = env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
 
   const ctr = dag
@@ -169,8 +176,7 @@ export async function image(
     .withExec(args);
 
   await ctr.stdout();
-  const id = await ctr.file(`/app/${outputFile}`).id();
-  return id;
+  return ctr.file(`/app/${outputFile}`).id();
 }
 
 /**
@@ -190,14 +196,15 @@ export async function sbom(
   format = "table",
   outputFile?: string
 ): Promise<File | string> {
-  const context = await getDirectory(dag, src);
-  if (!Deno.env.has("TRIVY_SBOM_PATH") && !path) {
+  const context = await getDirectory(src);
+  if (!env.has("TRIVY_SBOM_PATH") && !path) {
     console.error("TRIVY_SBOM_PATH is not set");
-    Deno.exit(1);
+    exit(1);
+    return "";
   }
 
-  const args = ["sbom", Deno.env.get("TRIVY_SBOM_PATH") || path!];
-  const TRIVY_EXIT_CODE = Deno.env.get("TRIVY_EXIT_CODE") || exitCode;
+  const args = ["sbom", env.get("TRIVY_SBOM_PATH") || path!];
+  const TRIVY_EXIT_CODE = env.get("TRIVY_EXIT_CODE") || exitCode;
   args.push(`--exit-code=${TRIVY_EXIT_CODE}`);
   args.push(`--format=${format}`);
 
@@ -213,8 +220,7 @@ export async function sbom(
     .withExec(args);
 
   await ctr.stdout();
-  const id = await ctr.file(`/app/${outputFile}`).id();
-  return id;
+  return ctr.file(`/app/${outputFile}`).id();
 }
 
 export type JobExec = (
@@ -231,12 +237,4 @@ export const runnableJobs: Record<Job, JobExec> = {
   [Job.repo]: repo,
   [Job.image]: image,
   [Job.sbom]: sbom,
-};
-
-export const jobDescriptions: Record<Job, string> = {
-  [Job.config]: "Scan a configuration file",
-  [Job.fs]: "Scan a local filesystem",
-  [Job.repo]: "Scan a repository",
-  [Job.image]: "Scan a container image",
-  [Job.sbom]: "Scan a software bill of materials",
 };
