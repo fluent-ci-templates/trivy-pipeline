@@ -21,8 +21,8 @@ jobs:
           working-directory: example
       - name: Run Dagger Pipelines
         run: |
-          dagger run deno run -A ../src/dagger/runner.ts config
-          dagger run deno run -A ../src/dagger/runner.ts image
+          dagger run deno run -A ../src/runner.ts config
+          dagger run deno run -A ../src/runner.ts image
         working-directory: example
         env:
           TRIVY_IMAGE: hashicorp/terraform:1.6

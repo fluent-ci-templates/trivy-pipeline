@@ -3,8 +3,8 @@
  * @description This module provides a set of functions for scanning container images, repositories, and local filesystems for vulnerabilities using Trivy.
  */
 
-import { Directory, File, dag, env, exit } from "../../deps.ts";
-import { getDirectory } from "./lib.ts";
+import { type Directory, type File, dag, env, exit } from "../deps.ts";
+import { getDirectory } from "./helpers.ts";
 
 export enum Job {
   config = "config",
