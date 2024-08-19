@@ -48,7 +48,7 @@ export async function config(
     .from("aquasec/trivy")
     .withDirectory("/app", context, { exclude })
     .withWorkdir("/app")
-    .withExec(args);
+    .withExec(args, { skipEntrypoint: false });
 
   await ctr.stdout();
   const id = await ctr.file(`/app/${outputFile}`).id();
@@ -88,7 +88,7 @@ export async function fs(
     .from("aquasec/trivy")
     .withDirectory("/app", context, { exclude })
     .withWorkdir("/app")
-    .withExec(args);
+    .withExec(args, { skipEntrypoint: false });
 
   await ctr.stdout();
 
@@ -128,7 +128,7 @@ export async function repo(
     .from("aquasec/trivy")
     .withDirectory("/app", context, { exclude })
     .withWorkdir("/app")
-    .withExec(args);
+    .withExec(args, { skipEntrypoint: false });
   await ctr.stdout();
 
   return ctr.file(`/app/${outputFile}`).id();
@@ -173,7 +173,7 @@ export async function image(
     .from("aquasec/trivy")
     .withDirectory("/app", context, { exclude })
     .withWorkdir("/app")
-    .withExec(args);
+    .withExec(args, { skipEntrypoint: false });
 
   await ctr.stdout();
   return ctr.file(`/app/${outputFile}`).id();
@@ -217,7 +217,7 @@ export async function sbom(
     .from("aquasec/trivy")
     .withDirectory("/app", context, { exclude })
     .withWorkdir("/app")
-    .withExec(args);
+    .withExec(args, { skipEntrypoint: false });
 
   await ctr.stdout();
   return ctr.file(`/app/${outputFile}`).id();
